@@ -77,8 +77,6 @@ public class KiraClient {
 
     public LaborDocenteDTO obtenerLabor(Long idDocente) {
         String url = buildUrl(baseUrl, pathLaborDocente) + "?id=" + idDocente;
-        log.debug("Consultando labor docente en: {}", url);
-
         try {
             ResponseEntity<LaborDocenteDTO> response = restTemplate.getForEntity(url, LaborDocenteDTO.class);
             return response.getBody();
