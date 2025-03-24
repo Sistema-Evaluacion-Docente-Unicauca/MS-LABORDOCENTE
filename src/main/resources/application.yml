@@ -1,0 +1,45 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: labor-docente
+  datasource:
+    url: ${DESARROLLO_DATASOURCE_URL}
+    username: ${DESARROLLO_DATASOURCE_USER}
+    password: ${DESARROLLO_DATASOURCE_PASSWORD}
+    driver-class-name: oracle.jdbc.OracleDriver
+
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        default_schema: SEDOCENTE
+
+external:
+  api:
+    kira:
+      base-url: ${KIRA_API_BASE_URL:http://10.200.1.181:8081/api/}
+      obtener-facultades: ${KIRA_API_OBTENER_FACULTADES:v1/labordocente/facultades}
+      obtener-periodos: ${KIRA_API_OBTENER_PERIODOS:v1/labordocente/periodos}
+      obtener-departamentos: ${KIRA_API_OBTENER_DEPARTAMENTOS:v1/labordocente/departamentos}
+      obtener-docentes: ${KIRA_API_OBTENER_DOCENTES:v1/labordocente/docentes}
+      obtener-labor-docente: ${KIRA_API_OBTENER_LABOR_DOCENTE:v1/labordocente/labor}
+
+    sed:
+      base-url: ${SED_BACKEND_BASE_URL:http://localhost:8080/}
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    'co.edu.unicauca.laborDocente': ${LOG_LEVEL_API:DEBUG}
+  file:
+    name: ${LOG_FILE_NAME:logs/mensajeria.log}
+  logback:
+    rollingpolicy:
+      max-file-size: ${LOG_FILE_MAX_SIZE:10MB}
+      max-history: ${LOG_FILE_MAX_HISTORY:5}
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n"
