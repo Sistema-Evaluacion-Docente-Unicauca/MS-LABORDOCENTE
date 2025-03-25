@@ -7,7 +7,7 @@ import lombok.Data;
  */
 @Data
 public class DocenteDTO {
-    private Long id;
+    private Integer id;
     private String identificacion;
     private String nombreCompleto;
 }

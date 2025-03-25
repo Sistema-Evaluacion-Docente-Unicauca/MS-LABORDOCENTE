@@ -1,6 +1,8 @@
 package co.edu.unicauca.laborDocente.api.controller;
 
 import co.edu.unicauca.laborDocente.api.dto.ActividadDTOTransformada;
+import co.edu.unicauca.laborDocente.api.dto.ApiResponse;
+import co.edu.unicauca.laborDocente.api.dto.UsuarioDocenteDTO;
 import co.edu.unicauca.laborDocente.api.service.DocenteLaborService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +30,21 @@ public class DocenteLaborController {
      */
     @GetMapping
     public ResponseEntity<List<ActividadDTOTransformada>> cargarLaborDocente(
-            @RequestParam Long idFacultad,
-            @RequestParam Long idPeriodo,
-            @RequestParam(required = false) Long idDepartamento) {
+            @RequestParam Integer idFacultad,
+            @RequestParam Integer idPeriodo,
+            @RequestParam(required = false) Integer idDepartamento) {
 
         List<ActividadDTOTransformada> resultado = docenteLaborService.cargarLaborDocente(idFacultad, idPeriodo, idDepartamento);
         return ResponseEntity.ok(resultado);
+    }
+
+    @GetMapping("/usuarios-docentes")
+    public ResponseEntity<ApiResponse<Void>> guardarUsuariosDocentes(
+            @RequestParam Integer idFacultad,
+            @RequestParam Integer idPeriodo,
+            @RequestParam(required = false) Integer idDepartamento) {
+
+        ApiResponse<Void> respuesta = docenteLaborService.generarUsuariosDocentes(idFacultad, idPeriodo, idDepartamento);
+        return ResponseEntity.status(respuesta.getCodigo()).body(respuesta);
     }
 }

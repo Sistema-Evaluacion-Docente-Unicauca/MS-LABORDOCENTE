@@ -7,10 +7,10 @@ import java.util.Map;
 
 @Data
 public class ActividadDTOTransformada {
-    private Map<String, Object> tipoActividad; // {"oidTipoActividad": 1} o nombre como string
+    private Map<String, Object> tipoActividad;
     private String oidEvaluador;
     private String oidEvaluado;
-    private Long oidEstadoActividad;
+    private Integer oidEstadoActividad;
     private String nombreActividad;
     private Double horas;
     private Double semanas;

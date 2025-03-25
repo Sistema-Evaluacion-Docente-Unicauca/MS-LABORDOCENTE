@@ -7,6 +7,6 @@ import lombok.Data;
  */
 @Data
 public class DepartamentoDTO {
-    private Long id;
+    private Integer id;
     private String label;
 }

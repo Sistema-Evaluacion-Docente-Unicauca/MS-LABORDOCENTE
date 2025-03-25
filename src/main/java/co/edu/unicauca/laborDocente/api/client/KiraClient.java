@@ -35,7 +35,7 @@ public class KiraClient {
     @Value("${external.api.kira.obtener-labor-docente}")
     private String pathLaborDocente;
 
-    public List<Long> obtenerDepartamentos(Long idFacultad, Long idDepartamento) {
+    public List<Integer> obtenerDepartamentos(Integer idFacultad, Integer idDepartamento) {
         if (idDepartamento != null) {
             return List.of(idDepartamento);
         }
@@ -58,7 +58,7 @@ public class KiraClient {
         return List.of();
     }
 
-    public List<DocenteDTO> obtenerDocentes(Long idDepto, Long idPeriodo) {
+    public List<DocenteDTO> obtenerDocentes(Integer idDepto, Integer idPeriodo) {
         String url = buildUrl(baseUrl, pathDocentes) + "?departamento=" + idDepto + "&periodo=" + idPeriodo;
         log.debug("Consultando docentes en: {}", url);
 
@@ -69,13 +69,14 @@ public class KiraClient {
                 return Arrays.asList(docentes);
             }
         } catch (Exception e) {
-            log.error("Error al consultar docentes del departamento {} en el periodo {}: {}", idDepto, idPeriodo, e.getMessage());
+            log.error("Error al consultar docentes del departamento {} en el periodo {}: {}", idDepto, idPeriodo,
+                    e.getMessage());
         }
 
         return List.of();
     }
 
-    public LaborDocenteDTO obtenerLabor(Long idDocente) {
+    public LaborDocenteDTO obtenerLabor(Integer idDocente) {
         String url = buildUrl(baseUrl, pathLaborDocente) + "?id=" + idDocente;
         try {
             ResponseEntity<LaborDocenteDTO> response = restTemplate.getForEntity(url, LaborDocenteDTO.class);

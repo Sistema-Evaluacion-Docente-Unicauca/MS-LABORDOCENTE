@@ -10,23 +10,24 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Clase responsable de transformar actividades KIRA a la estructura interna del sistema SED.
+ * Clase responsable de transformar actividades KIRA a la estructura interna del
+ * sistema SED.
  */
 @Component
 @Slf4j
 public class ActividadTransformer {
 
     public List<ActividadDTOTransformada> transformar(List<ActividadDTO> actividadesOriginales,
-                                                      Map<String, Long> atributos,
-                                                      Map<String, Long> tiposActividad,
-                                                      String oidEvaluador,
-                                                      String oidEvaluado) {
+            Map<String, Integer> atributos,
+            Map<String, Integer> tiposActividad,
+            String oidEvaluador,
+            String oidEvaluado) {
 
         List<ActividadDTOTransformada> resultado = new ArrayList<>();
 
         for (ActividadDTO actividad : actividadesOriginales) {
             String nombreActividad = actividad.getTipoActividad();
-            Long oidTipoActividad = tiposActividad.getOrDefault(nombreActividad.toUpperCase(), 0L);
+            Integer oidTipoActividad = tiposActividad.getOrDefault(nombreActividad.toUpperCase(), 0);
 
             for (Map<String, Object> detalle : actividad.getDetalles()) {
                 ActividadDTOTransformada nueva = new ActividadDTOTransformada();
@@ -34,11 +35,14 @@ public class ActividadTransformer {
                 nueva.setTipoActividad(Map.of("oidTipoActividad", oidTipoActividad));
                 nueva.setOidEvaluador(oidEvaluador);
                 nueva.setOidEvaluado(oidEvaluado);
-                nueva.setOidEstadoActividad(3L);
+                nueva.setOidEstadoActividad(3);
                 nueva.setNombreActividad(nombreActividad);
 
-                nueva.setSemanas(detalle.get("semanas") != null ? Double.valueOf(detalle.get("semanas").toString()) : 0.0);
-                nueva.setHoras(detalle.get("horasSemanales") != null ? Double.valueOf(detalle.get("horasSemanales").toString()) : 0.0);
+                nueva.setSemanas(
+                        detalle.get("semanas") != null ? Double.valueOf(detalle.get("semanas").toString()) : 0.0);
+                nueva.setHoras(
+                        detalle.get("horasSemanales") != null ? Double.valueOf(detalle.get("horasSemanales").toString())
+                                : 0.0);
                 nueva.setInformeEjecutivo(false);
 
                 List<AtributoValorDTO> atributosTransformados = detalle.entrySet().stream()
@@ -50,8 +54,7 @@ public class ActividadTransformer {
                             }
                             return new AtributoValorDTO(
                                     key,
-                                    e.getValue() != null ? e.getValue().toString() : null
-                            );
+                                    e.getValue() != null ? e.getValue().toString() : null);
                         })
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());

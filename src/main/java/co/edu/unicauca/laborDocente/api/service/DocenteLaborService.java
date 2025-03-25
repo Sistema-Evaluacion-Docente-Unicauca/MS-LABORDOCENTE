@@ -1,6 +1,7 @@
 package co.edu.unicauca.laborDocente.api.service;
 
 import co.edu.unicauca.laborDocente.api.dto.ActividadDTOTransformada;
+import co.edu.unicauca.laborDocente.api.dto.ApiResponse;
 
 import java.util.List;
 
@@ -10,12 +11,15 @@ import java.util.List;
 public interface DocenteLaborService {
 
     /**
-     * Consulta las labores docentes según la facultad, el periodo y opcionalmente un departamento.
+     * Consulta las labores docentes según la facultad, el periodo y opcionalmente
+     * un departamento.
      *
      * @param idFacultad     ID de la facultad
      * @param idPeriodo      ID del periodo académico
      * @param idDepartamento ID del departamento (opcional)
      * @return lista de labores docentes encontradas
      */
-    List<ActividadDTOTransformada> cargarLaborDocente(Long idFacultad, Long idPeriodo, Long idDepartamento);
+    List<ActividadDTOTransformada> cargarLaborDocente(Integer idFacultad, Integer idPeriodo, Integer idDepartamento);
+
+    ApiResponse<Void> generarUsuariosDocentes(Integer idFacultad, Integer idPeriodo, Integer idDepartamento);
 }

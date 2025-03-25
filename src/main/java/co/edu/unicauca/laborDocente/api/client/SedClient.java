@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import co.edu.unicauca.laborDocente.api.dto.UsuarioDocenteDTO;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,7 +25,7 @@ public class SedClient {
     @Value("${external.api.sed.base-url}")
     private String sedBaseUrl;
 
-    public Map<String, Long> obtenerAtributos() {
+    public Map<String, Integer> obtenerAtributos() {
         String url = sedBaseUrl.replaceAll("/$", "") + "/api/eavatributo";
         try {
             ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
@@ -33,7 +35,7 @@ public class SedClient {
             return atributos.stream()
                     .collect(Collectors.toMap(
                             a -> a.get("nombre").toString().toUpperCase(),
-                            a -> Long.parseLong(a.get("oideavAtributo").toString())
+                            a -> Integer.parseInt(a.get("oideavAtributo").toString())
                     ));
         } catch (Exception e) {
             log.error("Error al consultar atributos desde SED: {}", e.getMessage());
@@ -41,7 +43,7 @@ public class SedClient {
         }
     }
 
-    public Map<String, Long> obtenerTiposActividad() {
+    public Map<String, Integer> obtenerTiposActividad() {
         String url = sedBaseUrl.replaceAll("/$", "") + "/api/tipo-actividad";
         try {
             ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
@@ -50,11 +52,44 @@ public class SedClient {
             return tipos.stream()
                     .collect(Collectors.toMap(
                             t -> t.get("nombre").toString().toUpperCase(),
-                            t -> Long.parseLong(t.get("oidTipoActividad").toString())
+                            t -> Integer.parseInt(t.get("oidTipoActividad").toString())
                     ));
         } catch (Exception e) {
             log.error("Error al consultar tipos de actividad desde SED: {}", e.getMessage());
             return Collections.emptyMap();
+        }
+    }
+
+    public Map<String, Integer> obtenerRoles() {
+        String url = sedBaseUrl.replaceAll("/$", "") + "/api/roles";
+        try {
+            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+            Map<?, ?> body = response.getBody();
+            List<Map<String, Object>> roles = (List<Map<String, Object>>) body.get("content");
+
+            return roles.stream()
+                    .collect(Collectors.toMap(
+                            r -> r.get("nombre").toString().toUpperCase(),
+                            r -> Integer.parseInt(r.get("oid").toString())
+                    ));
+        } catch (Exception e) {
+            log.error("Error al consultar roles desde SED: {}", e.getMessage());
+            return Collections.emptyMap();
+        }
+    }
+
+    public String guardarUsuarios(List<UsuarioDocenteDTO> usuarios) {
+        String url = sedBaseUrl.replaceAll("/$", "") + "/api/usuarios";
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, usuarios, Map.class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return response.getBody().get("mensaje").toString();
+            } else {
+                return "Respuesta inesperada del sistema SED.";
+            }
+        } catch (Exception e) {
+            log.error("Error al guardar usuarios en SED: {}", e.getMessage());
+            throw new RuntimeException("Error al guardar usuarios en SED.", e);
         }
     }
 }
