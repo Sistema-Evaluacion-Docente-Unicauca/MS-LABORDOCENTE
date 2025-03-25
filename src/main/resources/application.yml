@@ -36,7 +36,7 @@ logging:
     root: ${LOG_LEVEL_ROOT:INFO}
     'co.edu.unicauca.laborDocente': ${LOG_LEVEL_API:DEBUG}
   file:
-    name: ${LOG_FILE_NAME:logs/mensajeria.log}
+    name: ${LOG_FILE_NAME:logs/laborDocente.log}
   logback:
     rollingpolicy:
       max-file-size: ${LOG_FILE_MAX_SIZE:10MB}
