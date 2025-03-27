@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import co.edu.unicauca.laborDocente.api.dto.ActividadDTOTransformada;
 import co.edu.unicauca.laborDocente.api.dto.UsuarioDocenteDTO;
 
 import java.util.*;
@@ -90,6 +91,21 @@ public class SedClient {
         } catch (Exception e) {
             log.error("Error al guardar usuarios en SED: {}", e.getMessage());
             throw new RuntimeException("Error al guardar usuarios en SED.", e);
+        }
+    }
+
+    public String guardarActividades(List<ActividadDTOTransformada> actividades) {
+        String url = sedBaseUrl.replaceAll("/$", "") + "/api/actividades";
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, actividades, Map.class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return response.getBody().get("mensaje").toString();
+            } else {
+                return "Respuesta inesperada del sistema SED.";
+            }
+        } catch (Exception e) {
+            log.error("Error al guardar actividades en SED: {}", e.getMessage());
+            throw new RuntimeException("Error al guardar actividades en SED.", e);
         }
     }
 }

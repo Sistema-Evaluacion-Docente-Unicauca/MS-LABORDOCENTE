@@ -19,7 +19,7 @@ public interface DocenteLaborService {
      * @param idDepartamento ID del departamento (opcional)
      * @return lista de labores docentes encontradas
      */
-    List<ActividadDTOTransformada> cargarLaborDocente(Integer idFacultad, Integer idPeriodo, Integer idDepartamento);
+    ApiResponse<Void> cargarLaborDocente(Integer idFacultad, Integer idPeriodo, Integer idDepartamento);
 
     ApiResponse<Void> generarUsuariosDocentes(Integer idFacultad, Integer idPeriodo, Integer idDepartamento);
 }

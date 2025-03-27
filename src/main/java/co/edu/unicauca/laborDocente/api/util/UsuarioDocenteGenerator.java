@@ -53,13 +53,14 @@ public class UsuarioDocenteGenerator {
 
     private UsuarioDetalleDTO construirDetalle(InformacionDocente info) {
         return new UsuarioDetalleDTO(
-                info.getFacultad(),
-                info.getDepartamento(),
-                info.getCategoria(),
-                info.getTipoContratacion(),
-                info.getDedicacion(),
-                info.getNivelEstudios());
-    }
+                info.getFacultad() != null ? info.getFacultad().trim() : null,
+                info.getDepartamento() != null ? info.getDepartamento().trim() : null,
+                info.getCategoria() != null ? info.getCategoria().trim() : null,
+                info.getTipoContratacion() != null ? info.getTipoContratacion().trim() : null,
+                info.getDedicacion() != null ? info.getDedicacion().trim() : null,
+                info.getNivelEstudios() != null ? info.getNivelEstudios().trim() : null
+        );
+    }    
 
     private String[] dividirNombre(String nombreCompleto) {
         if (nombreCompleto == null || nombreCompleto.isBlank()) {

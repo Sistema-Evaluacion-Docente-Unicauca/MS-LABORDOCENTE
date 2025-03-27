@@ -20,8 +20,8 @@ public class ActividadTransformer {
     public List<ActividadDTOTransformada> transformar(List<ActividadDTO> actividadesOriginales,
             Map<String, Integer> atributos,
             Map<String, Integer> tiposActividad,
-            String oidEvaluador,
-            String oidEvaluado) {
+            Integer oidEvaluador,
+            Integer oidEvaluado) {
 
         List<ActividadDTOTransformada> resultado = new ArrayList<>();
 
