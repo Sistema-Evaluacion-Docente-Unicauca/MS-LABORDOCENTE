@@ -4,9 +4,7 @@ import co.edu.unicauca.laborDocente.api.client.SedClient;
 import co.edu.unicauca.laborDocente.api.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Generador de objetos UsuarioDocenteDTO a partir de informacionDocente de
