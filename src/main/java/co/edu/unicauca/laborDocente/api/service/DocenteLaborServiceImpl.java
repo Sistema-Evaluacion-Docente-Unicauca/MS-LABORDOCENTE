@@ -2,30 +2,18 @@ package co.edu.unicauca.laborDocente.api.service;
 
 import co.edu.unicauca.laborDocente.api.client.KiraClient;
 import co.edu.unicauca.laborDocente.api.client.SedClient;
-import co.edu.unicauca.laborDocente.api.dto.ActividadDTO;
-import co.edu.unicauca.laborDocente.api.dto.ActividadDTOTransformada;
-import co.edu.unicauca.laborDocente.api.dto.ApiResponse;
-import co.edu.unicauca.laborDocente.api.dto.DocenteDTO;
-import co.edu.unicauca.laborDocente.api.dto.LaborDocenteDTO;
-import co.edu.unicauca.laborDocente.api.dto.UsuarioDocenteDTO;
+import co.edu.unicauca.laborDocente.api.dto.*;
 import co.edu.unicauca.laborDocente.api.util.ActividadTransformer;
 import co.edu.unicauca.laborDocente.api.util.UsuarioDocenteGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Servicio que orquesta la carga de labores docentes y su transformación para
- * el sistema SED.
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -37,81 +25,82 @@ public class DocenteLaborServiceImpl implements DocenteLaborService {
     private final UsuarioDocenteGenerator usuarioDocenteGenerator;
 
     @Override
-    public ApiResponse<Void> cargarLaborDocente(Integer idFacultad, Integer idPeriodo, Integer idDepartamento) {
-        Map<String, Integer> atributos = sedClient.obtenerAtributos();
-        Map<String, Integer> tiposActividad = sedClient.obtenerTiposActividad();
-        List<ActividadDTOTransformada> resultado = new ArrayList<>();
-
+    public ApiResponse<Void> procesarLaborDocente(Integer idFacultad, Integer idPeriodo, Integer idDepartamento) {
         List<Integer> departamentos = kiraClient.obtenerDepartamentos(idFacultad, idDepartamento);
-        ExecutorService executor = Executors.newFixedThreadPool(10);
-        List<CompletableFuture<List<ActividadDTOTransformada>>> futuros = new ArrayList<>();
+        Map<Integer, List<DocenteDTO>> docentesPorDepartamento = obtenerDocentesPorDepartamento(departamentos, idPeriodo);
+        Map<Integer, LaborDocenteDTO> labores = obtenerLabores(docentesPorDepartamento);
 
-        for (Integer idDepto : departamentos) {
-            List<DocenteDTO> docentes = kiraClient.obtenerDocentes(idDepto, idPeriodo);
+        // Generar usuarios docentes
+        ApiResponse<Void> usuariosResponse = generarUsuariosDocentes(new ArrayList<>(labores.values()));
 
-            for (DocenteDTO docente : docentes) {
-                CompletableFuture<List<ActividadDTOTransformada>> futuro = CompletableFuture.supplyAsync(() -> {
-                    LaborDocenteDTO labor = kiraClient.obtenerLabor(docente.getId());
-                    if (labor == null)
-                        return List.of();
+        // Generar actividades
+        ApiResponse<Void> actividadesResponse = cargarActividades(labores, idFacultad, idPeriodo, idDepartamento);
 
-                    return actividadTransformer.transformar(
-                            labor.getActividades(),
-                            atributos,
-                            tiposActividad,
-                            0,
-                            Integer.valueOf(docente.getIdentificacion()));
-                }, executor);
-
-                futuros.add(futuro);
-            }
+        if (usuariosResponse.getCodigo() != 200 || actividadesResponse.getCodigo() != 200) {
+            String error = usuariosResponse.getMensaje() + " | " + actividadesResponse.getMensaje();
+            return new ApiResponse<>(207, "Error parcial: " + error, null);
         }
 
-        futuros.stream()
-                .map(CompletableFuture::join)
-                .forEach(resultado::addAll);
-
-        executor.shutdown();
-
-        String mensaje = sedClient.guardarActividades(resultado);
-
-        String resumen = String.format("%s Carga realizada para facultad %d, periodo %d y departamento %s.",
-                mensaje, idFacultad, idPeriodo, idDepartamento != null ? idDepartamento : "TODOS");
-
-        return new ApiResponse<>(200, resumen, null);
+        return new ApiResponse<>(200, usuariosResponse.getMensaje() + " | " + actividadesResponse.getMensaje(), null);
     }
 
-
-    @Override
-    public ApiResponse<Void> generarUsuariosDocentes(Integer idFacultad, Integer idPeriodo, Integer idDepartamento) {
-        List<Integer> departamentos = kiraClient.obtenerDepartamentos(idFacultad, idDepartamento);
-        ExecutorService executor = Executors.newFixedThreadPool(10);
-
-        List<CompletableFuture<LaborDocenteDTO>> futuros = new ArrayList<>();
-
+    private Map<Integer, List<DocenteDTO>> obtenerDocentesPorDepartamento(List<Integer> departamentos, Integer idPeriodo) {
+        Map<Integer, List<DocenteDTO>> mapa = new HashMap<>();
         for (Integer idDepto : departamentos) {
-            List<DocenteDTO> docentes = kiraClient.obtenerDocentes(idDepto, idPeriodo);
+            mapa.put(idDepto, kiraClient.obtenerDocentes(idDepto, idPeriodo));
+        }
+        return mapa;
+    }
 
+    private Map<Integer, LaborDocenteDTO> obtenerLabores(Map<Integer, List<DocenteDTO>> docentesPorDepto) {
+        Map<Integer, LaborDocenteDTO> mapa = new HashMap<>();
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        List<CompletableFuture<Void>> tareas = new ArrayList<>();
+
+        for (List<DocenteDTO> docentes : docentesPorDepto.values()) {
             for (DocenteDTO docente : docentes) {
-                CompletableFuture<LaborDocenteDTO> futuro = CompletableFuture.supplyAsync(
-                        () -> kiraClient.obtenerLabor(docente.getId()), executor);
-                futuros.add(futuro);
+                CompletableFuture<Void> tarea = CompletableFuture.runAsync(() -> {
+                    LaborDocenteDTO labor = kiraClient.obtenerLabor(docente.getId());
+                    if (labor != null) {
+                        mapa.put(docente.getId(), labor);
+                    }
+                }, executor);
+                tareas.add(tarea);
             }
         }
 
-        // Esperar resultados y filtrar nulos
-        List<LaborDocenteDTO> laboresObtenidas = futuros.stream()
-                .map(CompletableFuture::join)
-                .filter(Objects::nonNull)
-                .toList();
-
+        CompletableFuture.allOf(tareas.toArray(new CompletableFuture[0])).join();
         executor.shutdown();
+        return mapa;
+    }
 
-        List<UsuarioDocenteDTO> usuarios = usuarioDocenteGenerator.generarDesdeLabor(laboresObtenidas);
+    private ApiResponse<Void> generarUsuariosDocentes(List<LaborDocenteDTO> labores) {
+        List<UsuarioDocenteDTO> usuarios = usuarioDocenteGenerator.generarDesdeLabor(labores);
+        String mensaje = sedClient.guardarUsuarios(usuarios);
+        return new ApiResponse<>(200, mensaje, null);
+    }
 
-        // Enviar usuarios a SED y obtener mensaje
-        String mensajeRespuesta = sedClient.guardarUsuarios(usuarios);
+    private ApiResponse<Void> cargarActividades(Map<Integer, LaborDocenteDTO> labores, Integer idFacultad, Integer idPeriodo, Integer idDepartamento) {
+        Map<String, Integer> atributos = sedClient.obtenerAtributos();
+        Map<String, Integer> tiposActividad = sedClient.obtenerTiposActividad();
+        List<ActividadDTOTransformada> transformadas = new ArrayList<>();
 
-        return new ApiResponse<>(200, mensajeRespuesta, null);
+        labores.forEach((idDocente, labor) -> {
+            List<ActividadDTO> actividades = labor.getActividades();
+            if (actividades != null && !actividades.isEmpty()) {
+                transformadas.addAll(actividadTransformer.transformar(
+                        actividades,
+                        atributos,
+                        tiposActividad,
+                        0,
+                        Integer.valueOf(labor.getInformacionDocente().getIdentificacion())
+                ));
+            }
+        });
+
+        String mensaje = sedClient.guardarActividades(transformadas);
+        String resumen = String.format("%s Carga realizada para facultad %d, periodo %d y departamento %s.",
+                mensaje, idFacultad, idPeriodo, idDepartamento != null ? idDepartamento : "TODOS");
+        return new ApiResponse<>(200, resumen, null);
     }
 }

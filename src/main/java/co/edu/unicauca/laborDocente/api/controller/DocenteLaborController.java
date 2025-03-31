@@ -17,30 +17,20 @@ public class DocenteLaborController {
     private final DocenteLaborService docenteLaborService;
 
     /**
-     * Consulta la labor docente según los parámetros recibidos.
+     * Realiza la carga de labor docente y creación de usuarios docentes a partir
+     * de la información de KIRA y la guarda en el sistema SED.
      *
      * @param idFacultad     ID de la facultad (obligatorio)
      * @param idPeriodo      ID del periodo académico (obligatorio)
      * @param idDepartamento ID del departamento (opcional)
-     * @return lista de labores docentes encontradas
+     * @return ApiResponse con mensaje de estado
      */
-    @GetMapping
-    public ResponseEntity<ApiResponse<Void>> cargarLaborDocente(
+    @PostMapping
+    public ResponseEntity<ApiResponse<Void>> procesarLaborDocente(
             @RequestParam Integer idFacultad,
             @RequestParam Integer idPeriodo,
             @RequestParam(required = false) Integer idDepartamento) {
-    
-        ApiResponse<Void> response = docenteLaborService.cargarLaborDocente(idFacultad, idPeriodo, idDepartamento);
-        return ResponseEntity.status(response.getCodigo()).body(response);
-    }
-
-    @GetMapping("/usuarios-docentes")
-    public ResponseEntity<ApiResponse<Void>> guardarUsuariosDocentes(
-            @RequestParam Integer idFacultad,
-            @RequestParam Integer idPeriodo,
-            @RequestParam(required = false) Integer idDepartamento) {
-
-        ApiResponse<Void> respuesta = docenteLaborService.generarUsuariosDocentes(idFacultad, idPeriodo, idDepartamento);
+        ApiResponse<Void> respuesta = docenteLaborService.procesarLaborDocente(idFacultad, idPeriodo, idDepartamento);
         return ResponseEntity.status(respuesta.getCodigo()).body(respuesta);
     }
 }
