@@ -5,6 +5,7 @@ import co.edu.unicauca.laborDocente.api.client.SedClient;
 import co.edu.unicauca.laborDocente.api.dto.*;
 import co.edu.unicauca.laborDocente.api.util.ActividadTransformer;
 import co.edu.unicauca.laborDocente.api.util.UsuarioDocenteGenerator;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class DocenteLaborServiceImpl implements DocenteLaborService {
     private final ActividadTransformer actividadTransformer;
     private final UsuarioDocenteGenerator usuarioDocenteGenerator;
 
+    @Transactional
     @Override
     public ApiResponse<Void> procesarLaborDocente(Integer idFacultad, Integer idPeriodo, Integer idDepartamento) {
         List<Integer> departamentos = kiraClient.obtenerDepartamentos(idFacultad, idDepartamento);
@@ -34,7 +36,7 @@ public class DocenteLaborServiceImpl implements DocenteLaborService {
         ApiResponse<Void> usuariosResponse = generarUsuariosDocentes(new ArrayList<>(labores.values()));
 
         // Generar actividades
-        ApiResponse<Void> actividadesResponse = cargarActividades(labores, idFacultad, idPeriodo, idDepartamento);
+        ApiResponse<Void> actividadesResponse = cargarActividades(labores);
 
         if (usuariosResponse.getCodigo() != 200 || actividadesResponse.getCodigo() != 200) {
             String error = usuariosResponse.getMensaje() + " | " + actividadesResponse.getMensaje();
@@ -80,7 +82,7 @@ public class DocenteLaborServiceImpl implements DocenteLaborService {
         return new ApiResponse<>(200, mensaje, null);
     }
 
-    private ApiResponse<Void> cargarActividades(Map<Integer, LaborDocenteDTO> labores, Integer idFacultad, Integer idPeriodo, Integer idDepartamento) {
+    private ApiResponse<Void> cargarActividades(Map<Integer, LaborDocenteDTO> labores) {
         Map<String, Integer> atributos = sedClient.obtenerAtributos();
         Map<String, Integer> tiposActividad = sedClient.obtenerTiposActividad();
         List<ActividadDTOTransformada> transformadas = new ArrayList<>();
@@ -99,8 +101,6 @@ public class DocenteLaborServiceImpl implements DocenteLaborService {
         });
 
         String mensaje = sedClient.guardarActividades(transformadas);
-        String resumen = String.format("%s Carga realizada para facultad %d, periodo %d y departamento %s.",
-                mensaje, idFacultad, idPeriodo, idDepartamento != null ? idDepartamento : "TODOS");
-        return new ApiResponse<>(200, resumen, null);
+        return new ApiResponse<>(200, mensaje, null);
     }
 }
