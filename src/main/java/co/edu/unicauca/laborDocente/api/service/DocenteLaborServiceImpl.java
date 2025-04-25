@@ -27,16 +27,13 @@ public class DocenteLaborServiceImpl implements DocenteLaborService {
 
     @Transactional
     @Override
-    public ApiResponse<Void> procesarLaborDocente(Integer idFacultad, Integer idPeriodo, Integer idDepartamento) {
+    public ApiResponse<Void> procesarLaborDocente(Integer idFacultad, Integer idPeriodo, Integer idDepartamento, String token) {
         List<Integer> departamentos = kiraClient.obtenerDepartamentos(idFacultad, idDepartamento);
         Map<Integer, List<DocenteDTO>> docentesPorDepartamento = obtenerDocentesPorDepartamento(departamentos, idPeriodo);
         Map<Integer, LaborDocenteDTO> labores = obtenerLabores(docentesPorDepartamento);
 
-        // Generar usuarios docentes
-        ApiResponse<Void> usuariosResponse = generarUsuariosDocentes(new ArrayList<>(labores.values()));
-
-        // Generar actividades
-        ApiResponse<Void> actividadesResponse = cargarActividades(labores);
+        ApiResponse<Void> usuariosResponse = generarUsuariosDocentes(new ArrayList<>(labores.values()), token);
+        ApiResponse<Void> actividadesResponse = cargarActividades(labores, token);
 
         if (usuariosResponse.getCodigo() != 200 || actividadesResponse.getCodigo() != 200) {
             String error = usuariosResponse.getMensaje() + " | " + actividadesResponse.getMensaje();
@@ -76,15 +73,15 @@ public class DocenteLaborServiceImpl implements DocenteLaborService {
         return mapa;
     }
 
-    private ApiResponse<Void> generarUsuariosDocentes(List<LaborDocenteDTO> labores) {
-        List<UsuarioDocenteDTO> usuarios = usuarioDocenteGenerator.generarDesdeLabor(labores);
-        String mensaje = sedClient.guardarUsuarios(usuarios);
+    private ApiResponse<Void> generarUsuariosDocentes(List<LaborDocenteDTO> labores, String token) {
+        List<UsuarioDocenteDTO> usuarios = usuarioDocenteGenerator.generarDesdeLabor(labores, token);
+        String mensaje = sedClient.guardarUsuarios(usuarios, token);
         return new ApiResponse<>(200, mensaje, null);
     }
 
-    private ApiResponse<Void> cargarActividades(Map<Integer, LaborDocenteDTO> labores) {
-        Map<String, Integer> atributos = sedClient.obtenerAtributos();
-        Map<String, Integer> tiposActividad = sedClient.obtenerTiposActividad();
+    private ApiResponse<Void> cargarActividades(Map<Integer, LaborDocenteDTO> labores, String token) {
+        Map<String, Integer> atributos = sedClient.obtenerAtributos(token);
+        Map<String, Integer> tiposActividad = sedClient.obtenerTiposActividad(token);
         List<ActividadDTOTransformada> transformadas = new ArrayList<>();
 
         labores.forEach((idDocente, labor) -> {
@@ -100,7 +97,7 @@ public class DocenteLaborServiceImpl implements DocenteLaborService {
             }
         });
 
-        String mensaje = sedClient.guardarActividades(transformadas);
+        String mensaje = sedClient.guardarActividades(transformadas, token);
         return new ApiResponse<>(200, mensaje, null);
     }
 }

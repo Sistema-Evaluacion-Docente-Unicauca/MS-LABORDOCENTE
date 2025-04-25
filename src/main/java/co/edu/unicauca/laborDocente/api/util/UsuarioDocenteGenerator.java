@@ -16,9 +16,9 @@ public class UsuarioDocenteGenerator {
 
     private final SedClient sedClient;
 
-    public List<UsuarioDocenteDTO> generarDesdeLabor(List<LaborDocenteDTO> labores) {
+    public List<UsuarioDocenteDTO> generarDesdeLabor(List<LaborDocenteDTO> labores, String token) {
         List<UsuarioDocenteDTO> resultado = new ArrayList<>();
-        Map<String, Integer> rolesPorNombre = sedClient.obtenerRoles();
+        Map<String, Integer> rolesPorNombre = sedClient.obtenerRoles(token);
         Integer rolDocente = rolesPorNombre.getOrDefault("DOCENTE", 1);
 
         for (LaborDocenteDTO labor : labores) {

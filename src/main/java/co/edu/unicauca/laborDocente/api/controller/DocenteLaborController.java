@@ -2,6 +2,7 @@ package co.edu.unicauca.laborDocente.api.controller;
 
 import co.edu.unicauca.laborDocente.api.dto.ApiResponse;
 import co.edu.unicauca.laborDocente.api.service.DocenteLaborService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,8 +30,11 @@ public class DocenteLaborController {
     public ResponseEntity<ApiResponse<Void>> procesarLaborDocente(
             @RequestParam Integer idFacultad,
             @RequestParam Integer idPeriodo,
-            @RequestParam(required = false) Integer idDepartamento) {
-        ApiResponse<Void> respuesta = docenteLaborService.procesarLaborDocente(idFacultad, idPeriodo, idDepartamento);
+            @RequestParam(required = false) Integer idDepartamento,
+            HttpServletRequest request) {
+    
+        String token = request.getHeader("Authorization");
+        ApiResponse<Void> respuesta = docenteLaborService.procesarLaborDocente(idFacultad, idPeriodo, idDepartamento, token);
         return ResponseEntity.status(respuesta.getCodigo()).body(respuesta);
     }
 }
