@@ -92,22 +92,18 @@ public class SedClient {
 
     public String guardarUsuarios(List<UsuarioDocenteDTO> usuarios, String token) {
         String url = sedBaseUrl.replaceAll("/$", "") + "/api/usuarios";
+        String mensaje = "";
         try {
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                    url,
-                    AuthHeaderUtil.crearRequest(token, usuarios),
-                    Map.class
-            );
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, AuthHeaderUtil.crearRequest(token, usuarios), Map.class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return response.getBody().get("mensaje").toString();
-            } else {
-                return "Respuesta inesperada del sistema SED.";
+                mensaje = response.getBody().get("mensaje").toString();
             }
         } catch (Exception e) {
             log.error("Error al guardar usuarios en SED: {}", e.getMessage());
             throw new RuntimeException("Error al guardar usuarios en SED.", e);
         }
+        return mensaje;
     }
 
     public String guardarActividades(List<ActividadDTOTransformada> actividades, String token) {

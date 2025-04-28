@@ -1,5 +1,5 @@
 server:
-  port: 8085
+  port: ${SERVER_PORT}
 
 spring:
   application:
@@ -8,7 +8,7 @@ spring:
     url: ${DESARROLLO_DATASOURCE_URL}
     username: ${DESARROLLO_DATASOURCE_USER}
     password: ${DESARROLLO_DATASOURCE_PASSWORD}
-    driver-class-name: oracle.jdbc.OracleDriver
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -27,6 +27,7 @@ external:
       obtener-departamentos: ${KIRA_API_OBTENER_DEPARTAMENTOS:v1/labordocente/departamentos}
       obtener-docentes: ${KIRA_API_OBTENER_DOCENTES:v1/labordocente/docentes}
       obtener-labor-docente: ${KIRA_API_OBTENER_LABOR_DOCENTE:v1/labordocente/labor}
+      obtener-data-tercero: ${KIRA_API_OBTENER_DATA_TERCERO}
 
     sed:
       base-url: ${SED_BACKEND_BASE_URL:http://localhost:8080/}

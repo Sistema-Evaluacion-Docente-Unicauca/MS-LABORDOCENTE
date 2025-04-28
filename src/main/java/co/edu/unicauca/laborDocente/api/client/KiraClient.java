@@ -1,8 +1,10 @@
 package co.edu.unicauca.laborDocente.api.client;
 
+import co.edu.unicauca.laborDocente.api.dto.DataTerceroDTO;
 import co.edu.unicauca.laborDocente.api.dto.DepartamentoDTO;
 import co.edu.unicauca.laborDocente.api.dto.DocenteDTO;
 import co.edu.unicauca.laborDocente.api.dto.LaborDocenteDTO;
+import co.edu.unicauca.laborDocente.api.dto.ProgramaDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +34,9 @@ public class KiraClient {
     @Value("${external.api.kira.obtener-docentes}")
     private String pathDocentes;
 
+    @Value("${external.api.kira.obtener-data-tercero}")
+    private String pathDataTercero;
+
     @Value("${external.api.kira.obtener-labor-docente}")
     private String pathLaborDocente;
 
@@ -47,9 +52,7 @@ public class KiraClient {
             ResponseEntity<DepartamentoDTO[]> response = restTemplate.getForEntity(url, DepartamentoDTO[].class);
             DepartamentoDTO[] departamentos = response.getBody();
             if (departamentos != null) {
-                return Arrays.stream(departamentos)
-                        .map(DepartamentoDTO::getId)
-                        .collect(Collectors.toList());
+                return Arrays.stream(departamentos).map(DepartamentoDTO::getId).collect(Collectors.toList());
             }
         } catch (Exception e) {
             log.error("Error al consultar departamentos para facultad {}: {}", idFacultad, e.getMessage());
@@ -86,6 +89,19 @@ public class KiraClient {
             return null;
         }
     }
+
+    public List<String> obtenerRolesActivosPorUsername(String username) {
+        String url = buildUrl(baseUrl, pathDataTercero) + username;
+        DataTerceroDTO dataTercero = restTemplate.getForObject(url, DataTerceroDTO.class);
+    
+        if (dataTercero == null || dataTercero.getPrograma() == null) {
+            return List.of();
+        }
+    
+        return dataTercero.getPrograma().stream()
+            .filter(programa -> "ACTIVO".equalsIgnoreCase(programa.getEstado()))
+            .map(ProgramaDTO::getRol).distinct().collect(Collectors.toList());
+    }    
 
     private String buildUrl(String base, String path) {
         return base.replaceAll("/$", "") + "/" + path.replaceAll("^/", "");

@@ -17,11 +17,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ActividadTransformer {
 
-    public List<ActividadDTOTransformada> transformar(List<ActividadDTO> actividadesOriginales,
-            Map<String, Integer> atributos,
-            Map<String, Integer> tiposActividad,
-            Integer oidEvaluador,
-            Integer oidEvaluado) {
+    public List<ActividadDTOTransformada> transformar(List<ActividadDTO> actividadesOriginales,Map<String, Integer> atributos, Map<String, Integer> tiposActividad,
+            Integer oidEvaluador, Integer oidEvaluado) {
 
         List<ActividadDTOTransformada> resultado = new ArrayList<>();
 
@@ -35,29 +32,22 @@ public class ActividadTransformer {
                 nueva.setTipoActividad(Map.of("oidTipoActividad", oidTipoActividad));
                 nueva.setOidEvaluador(oidEvaluador);
                 nueva.setOidEvaluado(oidEvaluado);
-                nueva.setOidEstadoActividad(3);
+                nueva.setOidEstadoActividad(1);
                 nueva.setNombreActividad(nombreActividad);
 
-                nueva.setSemanas(
-                        detalle.get("semanas") != null ? Double.valueOf(detalle.get("semanas").toString()) : 0.0);
-                nueva.setHoras(
-                        detalle.get("horasSemanales") != null ? Double.valueOf(detalle.get("horasSemanales").toString())
-                                : 0.0);
+                nueva.setSemanas(detalle.get("semanas") != null ? Double.valueOf(detalle.get("semanas").toString()) : 0.0);
+                nueva.setHoras(detalle.get("horasSemanales") != null ? Double.valueOf(detalle.get("horasSemanales").toString()) : 0.0);
                 nueva.setInformeEjecutivo(false);
 
                 List<AtributoValorDTO> atributosTransformados = detalle.entrySet().stream()
-                        .filter(e -> !List.of("semanas", "horasSemanales").contains(e.getKey()))
-                        .map(e -> {
-                            String key = e.getKey().toUpperCase();
-                            if (!atributos.containsKey(key)) {
-                                return null;
-                            }
-                            return new AtributoValorDTO(
-                                    key,
-                                    e.getValue() != null ? e.getValue().toString() : null);
-                        })
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
+                    .filter(e -> !List.of("semanas", "horasSemanales").contains(e.getKey()))
+                    .map(e -> {
+                        String key = e.getKey().toUpperCase();
+                        if (!atributos.containsKey(key)) {
+                            return null;
+                        }
+                        return new AtributoValorDTO(key, e.getValue() != null ? e.getValue().toString() : null);
+                    }).filter(Objects::nonNull).collect(Collectors.toList());
 
                 nueva.setAtributos(atributosTransformados);
                 resultado.add(nueva);

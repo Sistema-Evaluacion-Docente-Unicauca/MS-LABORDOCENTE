@@ -18,8 +18,7 @@ public class DocenteLaborController {
     private final DocenteLaborService docenteLaborService;
 
     /**
-     * Realiza la carga de labor docente y creación de usuarios docentes a partir
-     * de la información de KIRA y la guarda en el sistema SED.
+     * Realiza la carga de labor docente y creación de usuarios docentes a partir de la información de KIRA y la guarda en el sistema SED.
      *
      * @param idFacultad     ID de la facultad (obligatorio)
      * @param idPeriodo      ID del periodo académico (obligatorio)
