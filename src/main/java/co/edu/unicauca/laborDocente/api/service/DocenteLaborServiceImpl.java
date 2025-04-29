@@ -92,7 +92,7 @@ public class DocenteLaborServiceImpl implements DocenteLaborService {
             labores.forEach((idDocente, labor) -> {
                 List<ActividadDTO> actividades = labor.getActividades();
                 if (actividades != null && !actividades.isEmpty()) {
-                    transformadas.addAll(actividadTransformer.transformar(actividades, atributos, tiposActividad, 0, Integer.valueOf(labor.getInformacionDocente().getIdentificacion())));
+                    transformadas.addAll(actividadTransformer.transformar(actividades, atributos, tiposActividad, 0, Integer.valueOf(labor.getInformacionDocente().getIdentificacion()), labor.getIdLaborDocente()));
                 }
             });
 
@@ -132,6 +132,7 @@ public class DocenteLaborServiceImpl implements DocenteLaborService {
                     CompletableFuture<Void> tarea = CompletableFuture.runAsync(() -> {
                         LaborDocenteDTO labor = kiraClient.obtenerLabor(docente.getId());
                         if (labor != null) {
+                            labor.setIdLaborDocente(docente.getId());
                             mapa.put(docente.getId(), labor);
                         }
                     }, executor);

@@ -4,27 +4,35 @@ import co.edu.unicauca.laborDocente.api.dto.ActividadDTO;
 import co.edu.unicauca.laborDocente.api.dto.ActividadDTOTransformada;
 import co.edu.unicauca.laborDocente.api.dto.AtributoValorDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Clase responsable de transformar actividades KIRA a la estructura interna del
- * sistema SED.
+ * Clase responsable de transformar actividades KIRA a la estructura interna del sistema SED.
  */
 @Component
 @Slf4j
 public class ActividadTransformer {
 
-    public List<ActividadDTOTransformada> transformar(List<ActividadDTO> actividadesOriginales,Map<String, Integer> atributos, Map<String, Integer> tiposActividad,
-            Integer oidEvaluador, Integer oidEvaluado) {
+    private static final Logger logger = LoggerFactory.getLogger(ActividadTransformer.class);
+
+    public List<ActividadDTOTransformada> transformar(List<ActividadDTO> actividadesOriginales, Map<String, Integer> atributos, 
+    Map<String, Integer> tiposActividad, Integer oidEvaluador, Integer oidEvaluado, Integer idLaborDocente) {
 
         List<ActividadDTOTransformada> resultado = new ArrayList<>();
 
         for (ActividadDTO actividad : actividadesOriginales) {
             String nombreActividad = actividad.getTipoActividad();
             Integer oidTipoActividad = tiposActividad.getOrDefault(nombreActividad.toUpperCase(), 0);
+
+            // Imprimir un log si oidTipoActividad es 0
+            if (oidTipoActividad == 0) {
+                logger.warn("No se encontró el tipo de actividad para: '{}'. Se asignó el valor predeterminado '0'.", nombreActividad);
+            }
 
             for (Map<String, Object> detalle : actividad.getDetalles()) {
                 ActividadDTOTransformada nueva = new ActividadDTOTransformada();
@@ -33,7 +41,6 @@ public class ActividadTransformer {
                 nueva.setOidEvaluador(oidEvaluador);
                 nueva.setOidEvaluado(oidEvaluado);
                 nueva.setOidEstadoActividad(1);
-                nueva.setNombreActividad(nombreActividad);
 
                 nueva.setSemanas(detalle.get("semanas") != null ? Double.valueOf(detalle.get("semanas").toString()) : 0.0);
                 nueva.setHoras(detalle.get("horasSemanales") != null ? Double.valueOf(detalle.get("horasSemanales").toString()) : 0.0);
@@ -50,6 +57,8 @@ public class ActividadTransformer {
                     }).filter(Objects::nonNull).collect(Collectors.toList());
 
                 nueva.setAtributos(atributosTransformados);
+                nueva.setIdLaborDocente(idLaborDocente);
+                nueva.setEsLaborDocente(true);
                 resultado.add(nueva);
             }
         }

@@ -6,6 +6,7 @@ import lombok.Data;
 
 @Data
 public class LaborDocenteDTO {
+    private Integer idLaborDocente;
     private InformacionDocente informacionDocente;
     private List<ActividadDTO> actividades;
 }

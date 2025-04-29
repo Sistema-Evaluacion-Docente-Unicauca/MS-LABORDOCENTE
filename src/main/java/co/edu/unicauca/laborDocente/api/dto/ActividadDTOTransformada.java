@@ -16,4 +16,6 @@ public class ActividadDTOTransformada {
     private Double semanas;
     private Boolean informeEjecutivo;
     private List<AtributoValorDTO> atributos;
+    private Integer idLaborDocente;
+    private boolean esLaborDocente;
 }

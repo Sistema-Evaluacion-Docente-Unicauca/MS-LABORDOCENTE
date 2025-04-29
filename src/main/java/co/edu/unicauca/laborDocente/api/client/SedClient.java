@@ -24,7 +24,7 @@ public class SedClient {
     private String sedBaseUrl;
 
     public Map<String, Integer> obtenerAtributos(String token) {
-        String url = sedBaseUrl.replaceAll("/$", "") + "/api/eavatributo";
+        String url = sedBaseUrl.replaceAll("/$", "") + "/api/eavatributo?page=0&size=1000";
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
                     url,
@@ -47,7 +47,7 @@ public class SedClient {
     }
 
     public Map<String, Integer> obtenerTiposActividad(String token) {
-        String url = sedBaseUrl.replaceAll("/$", "") + "/api/tipo-actividad";
+        String url = sedBaseUrl.replaceAll("/$", "") + "/api/tipo-actividad?page=0&size=1000";
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
                     url,
@@ -69,7 +69,8 @@ public class SedClient {
     }
 
     public Map<String, Integer> obtenerRoles(String token) {
-        String url = sedBaseUrl.replaceAll("/$", "") + "/api/roles";
+        String url = sedBaseUrl.replaceAll("/$", "") + "/api/roles?page=1&size=1000";
+
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
                     url,
