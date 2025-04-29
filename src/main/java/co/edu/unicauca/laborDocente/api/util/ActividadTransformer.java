@@ -31,7 +31,7 @@ public class ActividadTransformer {
 
             // Imprimir un log si oidTipoActividad es 0
             if (oidTipoActividad == 0) {
-                logger.warn("No se encontró el tipo de actividad para: '{}'. Se asignó el valor predeterminado '0'.", nombreActividad);
+                logger.warn("No se encontró el tipo de actividad para: '{}', con idLaborDocente: '{}'. Se asignó el valor predeterminado '0'.", nombreActividad, idLaborDocente);
             }
 
             for (Map<String, Object> detalle : actividad.getDetalles()) {
