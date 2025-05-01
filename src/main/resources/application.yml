@@ -16,7 +16,7 @@ spring:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
       hibernate:
-        default_schema: SEDOCENTE
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 external:
   api:
