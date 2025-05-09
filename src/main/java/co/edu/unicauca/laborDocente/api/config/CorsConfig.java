@@ -15,7 +15,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:4200", "https://staging.miapp.com", "https://www.miapp.com")
+                        .allowedOrigins("http://localhost:4200", "https://kubetest.unicauca.edu.co")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
@@ -23,4 +23,3 @@ public class CorsConfig {
         };
     }
 }
-
