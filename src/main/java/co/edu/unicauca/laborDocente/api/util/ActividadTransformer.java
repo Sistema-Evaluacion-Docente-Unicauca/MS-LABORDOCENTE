@@ -50,7 +50,7 @@ public class ActividadTransformer {
 
     private Integer obtenerOidTipoActividad(ActividadDTO actividad, Map<String, Integer> tiposActividad, Integer idLaborDocente) {
         String nombreActividad = normalizarNombreActividad(actividad.getTipoActividad());
-        actividad.setTipoActividad(nombreActividad); // Actualizas el DTO corregido
+        actividad.setTipoActividad(nombreActividad);
         Integer oidTipoActividad = tiposActividad.getOrDefault(nombreActividad.toUpperCase(), 0);
     
         if (oidTipoActividad == 0) {
@@ -77,7 +77,7 @@ public class ActividadTransformer {
         List<AtributoValorDTO> atributosTransformados = detalle.entrySet().stream()
                 .filter(e -> !List.of("semanas", "horasSemanales").contains(e.getKey()))
                 .map(e -> {
-                    String key = e.getKey().toUpperCase();
+                    String key = transformarClaveAtributo(e.getKey());
                     if (!atributos.containsKey(key)) {
                         return null;
                     }
@@ -91,5 +91,12 @@ public class ActividadTransformer {
         nueva.setEsLaborDocente(true);
 
         return nueva;
+    }
+
+    private String transformarClaveAtributo(String key) {
+        if ("CODIGOVRI".equalsIgnoreCase(key)) {
+            return "VRI";
+        }
+        return key.toUpperCase();
     }
 }

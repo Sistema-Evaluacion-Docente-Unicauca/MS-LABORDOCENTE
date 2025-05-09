@@ -1,0 +1,25 @@
+# Carpetas de compilación
+target/
+build/
+
+# Configuración de IDEs
+*.iml
+.idea/
+*.classpath
+*.project
+*.settings/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Git y versiones
+.git/
+.gitignore
+
+# Logs
+*.log
+logs/
+
+# Archivos de entorno
+.env

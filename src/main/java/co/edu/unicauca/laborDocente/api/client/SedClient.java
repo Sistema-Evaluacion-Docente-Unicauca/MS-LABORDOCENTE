@@ -48,6 +48,7 @@ public class SedClient {
 
     public Map<String, Integer> obtenerTiposActividad(String token) {
         String url = sedBaseUrl.replaceAll("/$", "") + "/api/tipo-actividad?page=0&size=1000";
+    
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
                     url,
@@ -55,18 +56,26 @@ public class SedClient {
                     AuthHeaderUtil.crearRequest(token),
                     Map.class
             );
-
-            List<Map<String, Object>> tipos = (List<Map<String, Object>>) response.getBody().get("content");
-
+    
+            Map<String, Object> body = response.getBody();
+            if (body == null || !body.containsKey("data")) {
+                log.warn("⚠️ Respuesta sin campo 'data'");
+                return Collections.emptyMap();
+            }
+    
+            Map<String, Object> data = (Map<String, Object>) body.get("data");
+            List<Map<String, Object>> tipos = (List<Map<String, Object>>) data.get("content");
+    
             return tipos.stream().collect(Collectors.toMap(
                     t -> t.get("nombre").toString().toUpperCase(),
                     t -> Integer.parseInt(t.get("oidTipoActividad").toString())
             ));
+    
         } catch (Exception e) {
-            log.error("Error al consultar tipos de actividad desde SED: {}", e.getMessage());
+            log.error("❌ Error al consultar tipos de actividad desde SED: {}", e.getMessage(), e);
             return Collections.emptyMap();
         }
-    }
+    }    
 
     public Map<String, Integer> obtenerRoles(String token) {
         String url = sedBaseUrl.replaceAll("/$", "") + "/api/roles?page=1&size=1000";
