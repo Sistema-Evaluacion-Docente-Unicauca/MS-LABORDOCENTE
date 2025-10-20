@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.slf4j.Logger;
@@ -123,9 +124,10 @@ public class DocenteLaborServiceImpl implements DocenteLaborService {
     }    
 
     private Map<Integer, LaborDocenteDTO> obtenerLabores(Map<Integer, List<DocenteDTO>> docentesPorDepto) {
-        Map<Integer, LaborDocenteDTO> mapa = new HashMap<>();
+        Map<Integer, LaborDocenteDTO> mapa = new ConcurrentHashMap<>();
         ExecutorService executor = Executors.newFixedThreadPool(10);
         List<CompletableFuture<Void>> tareas = new ArrayList<>();
+
         try {
             for (List<DocenteDTO> docentes : docentesPorDepto.values()) {
                 for (DocenteDTO docente : docentes) {
@@ -139,14 +141,16 @@ public class DocenteLaborServiceImpl implements DocenteLaborService {
                     tareas.add(tarea);
                 }
             }
-    
+
             CompletableFuture.allOf(tareas.toArray(new CompletableFuture[0])).join();
         } catch (Exception e) {
             logger.error("Error al obtener labores docentes", e);
             throw new RuntimeException("Error al obtener labores docentes: " + e.getMessage(), e);
-        } finally {            
+        } finally {
             executor.shutdown();
         }
+
         return mapa;
     }
+
 }

@@ -31,7 +31,6 @@ public class DocenteLaborController {
             @RequestParam Integer idPeriodo,
             @RequestParam(required = false) Integer idDepartamento,
             HttpServletRequest request) {
-    
         String token = request.getHeader("Authorization");
         ApiResponse<Void> respuesta = docenteLaborService.procesarLaborDocente(idFacultad, idPeriodo, idDepartamento, token);
         return ResponseEntity.status(respuesta.getCodigo()).body(respuesta);
